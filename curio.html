@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #E7E2D3;
+    --paper-card: #F6F3EA;
+    --ink: #262420;
+    --ink-soft: #6b6558;
+    --accent-teal: #1F5C52;
+    --accent-teal-dim: #dfe8e4;
+    --accent-rust: #9C3D2E;
+    --line: #c9c2ac;
+    --line-soft: #d9d3c1;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(38,36,32,0.05) 1px, transparent 0);
+    background-size: 18px 18px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:18px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .brand h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:2.4rem;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .brand p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:0.92rem;
+    max-width:40ch;
+  }
+  .newbtn{
+    background:var(--ink);
+    color:var(--paper-card);
+    border:none;
+    padding:12px 20px;
+    font-family:'Inter';
+    font-size:0.92rem;
+    font-weight:600;
+    border-radius:3px;
+    cursor:pointer;
+    transition: background 0.15s ease;
+    white-space:nowrap;
+  }
+  .newbtn:hover{background:var(--accent-teal);}
+
+  .shared-note{
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    margin:10px 0 28px;
+    padding:10px 14px;
+    background:var(--accent-teal-dim);
+    border-left:3px solid var(--accent-teal);
+    border-radius:2px;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  .toolbar select, .toolbar input{
+    font-family:'Inter';
+    font-size:0.85rem;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    background:var(--paper-card);
+    color:var(--ink);
+    border-radius:3px;
+  }
+  .toolbar input{flex:1;min-width:160px;}
+  .count{
+    margin-left:auto;
+    font-size:0.8rem;
+    color:var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+    gap:20px;
+  }
+
+  .card{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .cardnum{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:var(--ink);
+    color:var(--paper-card);
+    font-size:0.68rem;
+    font-weight:600;
+    letter-spacing:0.03em;
+    padding:2px 7px;
+    border-radius:2px;
+    z-index:2;
+  }
+  .card .thumb{
+    width:100%;
+    aspect-ratio: 4/3;
+    object-fit:cover;
+    background:var(--line-soft);
+    display:block;
+  }
+  .thumb-empty{
+    width:100%;
+    aspect-ratio:4/3;
+    background:var(--line-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink-soft);
+    font-size:0.75rem;
+  }
+  .card-body{
+    padding:14px 14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+  }
+  .card-title{
+    font-family:'Fraunces', serif;
+    font-size:1.15rem;
+    font-weight:600;
+    margin:0;
+    line-height:1.25;
+  }
+  .card-cat{
+    font-size:0.72rem;
+    color:var(--accent-teal);
+    font-weight:600;
+  }
+  .stars{display:flex;gap:3px;margin:2px 0;}
+  .stars .dot{
+    width:9px;height:9px;border-radius:50%;
+    border:1.4px solid var(--accent-rust);
+  }
+  .stars .dot.filled{background:var(--accent-rust);}
+  .card-notes{
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    line-height:1.45;
+    margin:2px 0 0;
+    flex:1;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .card-foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+  }
+  .del{
+    background:none;border:none;color:var(--ink-soft);cursor:pointer;
+    font-size:0.72rem;text-decoration:underline;padding:0;
+  }
+  .del:hover{color:var(--accent-rust);}
+
+  .empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    border:1px dashed var(--line);
+    border-radius:4px;
+  }
+  .empty strong{display:block;font-family:'Fraunces',serif;font-size:1.2rem;color:var(--ink);margin-bottom:6px;font-weight:600;}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(38,36,32,0.45);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px;
+    overflow-y:auto;
+    z-index:10;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--paper-card);
+    border-radius:5px;
+    max-width:460px;
+    width:100%;
+    padding:26px 26px 24px;
+    border:1px solid var(--line);
+  }
+  .modal h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.4rem;
+    margin:0 0 18px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;font-size:0.78rem;font-weight:600;color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input[type=text], .field textarea, .field select{
+    width:100%;
+    font-family:'Inter';
+    font-size:0.9rem;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    background:#fff;
+    color:var(--ink);
+    resize:vertical;
+  }
+  .field textarea{min-height:80px;}
+  .rate-picker{display:flex;gap:8px;}
+  .rate-picker .dot{
+    width:22px;height:22px;border-radius:50%;
+    border:1.6px solid var(--accent-rust);
+    cursor:pointer;
+  }
+  .rate-picker .dot.filled{background:var(--accent-rust);}
+  .imgpick{
+    border:1px dashed var(--line);
+    border-radius:4px;
+    padding:14px;
+    text-align:center;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    cursor:pointer;
+    background:#fff;
+  }
+  .imgpick img{max-width:100%;max-height:140px;display:block;margin:8px auto 0;border-radius:3px;}
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:10px;margin-top:20px;
+  }
+  .btn-secondary{
+    background:none;border:1px solid var(--line);color:var(--ink);
+    padding:10px 16px;border-radius:3px;cursor:pointer;font-family:'Inter';font-size:0.85rem;
+  }
+  .btn-primary{
+    background:var(--accent-teal);border:none;color:#fff;
+    padding:10px 18px;border-radius:3px;cursor:pointer;font-family:'Inter';font-weight:600;font-size:0.85rem;
+  }
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+  .err{color:var(--accent-rust);font-size:0.8rem;margin-top:-8px;margin-bottom:12px;display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Curio</h1>
+      <p>A shared catalog for anything worth photographing, rating, and writing down.</p>
+    </div>
+    <button class="newbtn" id="openNew">+ New entry</button>
+  </header>
+
+  <div class="shared-note">Entries here are shared — anyone who opens this catalog can see and add to it.</div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search entries…">
+    <select id="filterCat"><option value="">All categories</option></select>
+    <select id="sortBy">
+      <option value="new">Newest first</option>
+      <option value="old">Oldest first</option>
+      <option value="rating">Highest rated</option>
+    </select>
+    <span class="count" id="count"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>Catalog a new entry</h2>
+    <div class="field">
+      <label>Photo</label>
+      <div class="imgpick" id="imgPick">Click to choose an image<div id="imgPreviewWrap"></div></div>
+      <input type="file" id="imgInput" accept="image/*" style="display:none">
+    </div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="title" placeholder="What is it?">
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <input type="text" id="category" placeholder="e.g. Books, Gear, Coffee, Places">
+    </div>
+    <div class="field">
+      <label>Rating</label>
+      <div class="rate-picker" id="ratePicker"></div>
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="notes" placeholder="What stands out about it?"></textarea>
+    </div>
+    <div class="err" id="formErr">Give it a title and a rating before saving.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelNew">Cancel</button>
+      <button class="btn-primary" id="saveNew">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'curio-entries';
+let entries = [];
+let pendingImage = null;
+let pendingRating = 0;
+
+const grid = document.getElementById('grid');
+const overlay = document.getElementById('overlay');
+const countEl = document.getElementById('count');
+const filterCat = document.getElementById('filterCat');
+const searchInput = document.getElementById('search');
+const sortBy = document.getElementById('sortBy');
+
+function starsHTML(rating, size){
+  let h = '<div class="stars">';
+  for(let i=1;i<=5;i++){
+    h += `<div class="dot ${i<=rating?'filled':''}"></div>`;
+  }
+  return h + '</div>';
+}
+
+function fmtDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined,{month:'short', day:'numeric', year:'numeric'});
+}
+
+function renderCategoryOptions(){
+  const cats = [...new Set(entries.map(e=>e.category).filter(Boolean))].sort();
+  const current = filterCat.value;
+  filterCat.innerHTML = '<option value="">All categories</option>' +
+    cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  filterCat.value = current;
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function render(){
+  renderCategoryOptions();
+  let list = [...entries];
+
+  const q = searchInput.value.trim().toLowerCase();
+  if(q){
+    list = list.filter(e =>
+      (e.title||'').toLowerCase().includes(q) ||
+      (e.notes||'').toLowerCase().includes(q) ||
+      (e.category||'').toLowerCase().includes(q)
+    );
+  }
+  const cat = filterCat.value;
+  if(cat) list = list.filter(e => e.category === cat);
+
+  if(sortBy.value === 'new') list.sort((a,b)=>b.createdAt-a.createdAt);
+  else if(sortBy.value === 'old') list.sort((a,b)=>a.createdAt-b.createdAt);
+  else if(sortBy.value === 'rating') list.sort((a,b)=>b.rating-a.rating || b.createdAt-a.createdAt);
+
+  countEl.textContent = `${list.length} ${list.length===1?'entry':'entries'}`;
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty"><strong>Nothing here yet.</strong>Be the first to catalog something.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(e => {
+    const num = String(entries.findIndex(x=>x.id===e.id)+1).padStart(3,'0');
+    const img = e.image ? `<img class="thumb" src="${e.image}" alt="">` : `<div class="thumb-empty">No image</div>`;
+    return `
+    <div class="card">
+      <div class="cardnum">No. ${num}</div>
+      ${img}
+      <div class="card-body">
+        ${e.category ? `<div class="card-cat">${escapeHtml(e.category)}</div>` : ''}
+        <h3 class="card-title">${escapeHtml(e.title)}</h3>
+        ${starsHTML(e.rating)}
+        ${e.notes ? `<p class="card-notes">${escapeHtml(e.notes)}</p>` : ''}
+        <div class="card-foot">
+          <span>${fmtDate(e.createdAt)}</span>
+          <button class="del" data-id="${e.id}">remove</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
+  });
+}
+
+async function loadEntries(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, true);
+    entries = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    entries = [];
+  }
+  render();
+}
+
+async function saveEntries(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(entries), true);
+  }catch(e){
+    console.error('Storage error', e);
+  }
+}
+
+async function deleteEntry(id){
+  if(!confirm('Remove this entry from the catalog?')) return;
+  entries = entries.filter(e=>e.id!==id);
+  render();
+  await saveEntries();
+}
+
+// --- modal / new entry form ---
+const openNewBtn = document.getElementById('openNew');
+const cancelNewBtn = document.getElementById('cancelNew');
+const saveNewBtn = document.getElementById('saveNew');
+const imgPick = document.getElementById('imgPick');
+const imgInput = document.getElementById('imgInput');
+const imgPreviewWrap = document.getElementById('imgPreviewWrap');
+const ratePicker = document.getElementById('ratePicker');
+const formErr = document.getElementById('formErr');
+
+for(let i=1;i<=5;i++){
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.dataset.val = i;
+  dot.addEventListener('click', ()=>{
+    pendingRating = i;
+    renderRatePicker();
+  });
+  ratePicker.appendChild(dot);
+}
+function renderRatePicker(){
+  [...ratePicker.children].forEach((dot,i)=>{
+    dot.classList.toggle('filled', i < pendingRating);
+  });
+}
+
+function resetForm(){
+  document.getElementById('title').value = '';
+  document.getElementById('category').value = '';
+  document.getElementById('notes').value = '';
+  pendingImage = null;
+  pendingRating = 0;
+  imgPreviewWrap.innerHTML = '';
+  renderRatePicker();
+  formErr.style.display = 'none';
+}
+
+openNewBtn.addEventListener('click', ()=>{
+  resetForm();
+  overlay.classList.add('open');
+});
+cancelNewBtn.addEventListener('click', ()=> overlay.classList.remove('open'));
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.classList.remove('open'); });
+
+imgPick.addEventListener('click', ()=> imgInput.click());
+imgInput.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      const maxW = 800;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingImage = canvas.toDataURL('image/jpeg', 0.8);
+      imgPreviewWrap.innerHTML = `<img src="${pendingImage}">`;
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+saveNewBtn.addEventListener('click', async ()=>{
+  const title = document.getElementById('title').value.trim();
+  const category = document.getElementById('category').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+
+  if(!title || pendingRating === 0){
+    formErr.style.display = 'block';
+    return;
+  }
+  formErr.style.display = 'none';
+
+  const entry = {
+    id: 'e' + Date.now() + Math.random().toString(36).slice(2,7),
+    title, category, notes,
+    rating: pendingRating,
+    image: pendingImage,
+    createdAt: Date.now()
+  };
+  saveNewBtn.disabled = true;
+  entries.unshift(entry);
+  render();
+  await saveEntries();
+  saveNewBtn.disabled = false;
+  overlay.classList.remove('open');
+});
+
+searchInput.addEventListener('input', render);
+filterCat.addEventListener('change', render);
+sortBy.addEventListener('change', render);
+
+loadEntries();
+</script>
+</body>
+</html>
