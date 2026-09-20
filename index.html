@@ -342,8 +342,31 @@
   </div>
 </div>
 
-<script>
-const STORAGE_KEY = 'curio-entries';
+<script type="module">
+// ============================================================
+// FIREBASE SETUP — replace the values below with your own
+// project's config from the Firebase console (see instructions
+// you were given). Nothing will save/load until you do this.
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const entriesCol = collection(db, "curio-entries");
+// ============================================================
+
 let entries = [];
 let pendingImage = null;
 let pendingRating = 0;
@@ -433,29 +456,24 @@ function render(){
   });
 }
 
-async function loadEntries(){
-  try{
-    const res = await window.storage.get(STORAGE_KEY, true);
-    entries = res && res.value ? JSON.parse(res.value) : [];
-  }catch(e){
-    entries = [];
-  }
-  render();
-}
-
-async function saveEntries(){
-  try{
-    await window.storage.set(STORAGE_KEY, JSON.stringify(entries), true);
-  }catch(e){
-    console.error('Storage error', e);
-  }
+function listenForEntries(){
+  onSnapshot(entriesCol, (snapshot)=>{
+    entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }, (err)=>{
+    console.error('Firestore error', err);
+    grid.innerHTML = `<div class="empty"><strong>Couldn't connect.</strong>Check that the Firebase config at the top of the script has been filled in, and that Firestore rules allow access.</div>`;
+  });
 }
 
 async function deleteEntry(id){
   if(!confirm('Remove this entry from the catalog?')) return;
-  entries = entries.filter(e=>e.id!==id);
-  render();
-  await saveEntries();
+  try{
+    await deleteDoc(doc(db, "curio-entries", id));
+  }catch(e){
+    console.error('Delete error', e);
+    alert('Could not remove this entry — check your connection and Firebase rules.');
+  }
 }
 
 // --- modal / new entry form ---
@@ -537,25 +555,27 @@ saveNewBtn.addEventListener('click', async ()=>{
   formErr.style.display = 'none';
 
   const entry = {
-    id: 'e' + Date.now() + Math.random().toString(36).slice(2,7),
     title, category, notes,
     rating: pendingRating,
     image: pendingImage,
     createdAt: Date.now()
   };
   saveNewBtn.disabled = true;
-  entries.unshift(entry);
-  render();
-  await saveEntries();
+  try{
+    await addDoc(entriesCol, entry);
+    overlay.classList.remove('open');
+  }catch(e){
+    console.error('Save error', e);
+    alert('Could not save — check your connection and Firebase config/rules.');
+  }
   saveNewBtn.disabled = false;
-  overlay.classList.remove('open');
 });
 
 searchInput.addEventListener('input', render);
 filterCat.addEventListener('change', render);
 sortBy.addEventListener('change', render);
 
-loadEntries();
+listenForEntries();
 </script>
 </body>
 </html>
