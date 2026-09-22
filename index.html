@@ -1,581 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Curio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --paper: #E7E2D3;
-    --paper-card: #F6F3EA;
-    --ink: #262420;
-    --ink-soft: #6b6558;
-    --accent-teal: #1F5C52;
-    --accent-teal-dim: #dfe8e4;
-    --accent-rust: #9C3D2E;
-    --line: #c9c2ac;
-    --line-soft: #d9d3c1;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--paper);
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(38,36,32,0.05) 1px, transparent 0);
-    background-size: 18px 18px;
-    color:var(--ink);
-    font-family:'Inter', sans-serif;
-    min-height:100vh;
-  }
-  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px;}
-
-  header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    gap:16px;
-    border-bottom:2px solid var(--ink);
-    padding-bottom:18px;
-    margin-bottom:8px;
-    flex-wrap:wrap;
-  }
-  .brand h1{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:2.4rem;
-    margin:0 0 4px;
-    letter-spacing:-0.01em;
-  }
-  .brand p{
-    margin:0;
-    color:var(--ink-soft);
-    font-size:0.92rem;
-    max-width:40ch;
-  }
-  .newbtn{
-    background:var(--ink);
-    color:var(--paper-card);
-    border:none;
-    padding:12px 20px;
-    font-family:'Inter';
-    font-size:0.92rem;
-    font-weight:600;
-    border-radius:3px;
-    cursor:pointer;
-    transition: background 0.15s ease;
-    white-space:nowrap;
-  }
-  .newbtn:hover{background:var(--accent-teal);}
-
-  .shared-note{
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    margin:10px 0 28px;
-    padding:10px 14px;
-    background:var(--accent-teal-dim);
-    border-left:3px solid var(--accent-teal);
-    border-radius:2px;
-  }
-
-  .toolbar{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom:26px;
-    flex-wrap:wrap;
-  }
-  .toolbar select, .toolbar input{
-    font-family:'Inter';
-    font-size:0.85rem;
-    padding:8px 10px;
-    border:1px solid var(--line);
-    background:var(--paper-card);
-    color:var(--ink);
-    border-radius:3px;
-  }
-  .toolbar input{flex:1;min-width:160px;}
-  .count{
-    margin-left:auto;
-    font-size:0.8rem;
-    color:var(--ink-soft);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
-    gap:20px;
-  }
-
-  .card{
-    background:var(--paper-card);
-    border:1px solid var(--line);
-    border-radius:4px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    position:relative;
-  }
-  .cardnum{
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:var(--ink);
-    color:var(--paper-card);
-    font-size:0.68rem;
-    font-weight:600;
-    letter-spacing:0.03em;
-    padding:2px 7px;
-    border-radius:2px;
-    z-index:2;
-  }
-  .card .thumb{
-    width:100%;
-    aspect-ratio: 4/3;
-    object-fit:cover;
-    background:var(--line-soft);
-    display:block;
-  }
-  .thumb-empty{
-    width:100%;
-    aspect-ratio:4/3;
-    background:var(--line-soft);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--ink-soft);
-    font-size:0.75rem;
-  }
-  .card-body{
-    padding:14px 14px 16px;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    flex:1;
-  }
-  .card-title{
-    font-family:'Fraunces', serif;
-    font-size:1.15rem;
-    font-weight:600;
-    margin:0;
-    line-height:1.25;
-  }
-  .card-cat{
-    font-size:0.72rem;
-    color:var(--accent-teal);
-    font-weight:600;
-  }
-  .stars{display:flex;gap:3px;margin:2px 0;}
-  .stars .dot{
-    width:9px;height:9px;border-radius:50%;
-    border:1.4px solid var(--accent-rust);
-  }
-  .stars .dot.filled{background:var(--accent-rust);}
-  .card-notes{
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    line-height:1.45;
-    margin:2px 0 0;
-    flex:1;
-    display:-webkit-box;
-    -webkit-line-clamp:3;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-  }
-  .card-foot{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:10px;
-    font-size:0.72rem;
-    color:var(--ink-soft);
-  }
-  .del{
-    background:none;border:none;color:var(--ink-soft);cursor:pointer;
-    font-size:0.72rem;text-decoration:underline;padding:0;
-  }
-  .del:hover{color:var(--accent-rust);}
-
-  .empty{
-    grid-column:1/-1;
-    text-align:center;
-    padding:60px 20px;
-    color:var(--ink-soft);
-    border:1px dashed var(--line);
-    border-radius:4px;
-  }
-  .empty strong{display:block;font-family:'Fraunces',serif;font-size:1.2rem;color:var(--ink);margin-bottom:6px;font-weight:600;}
-
-  /* modal */
-  .overlay{
-    position:fixed;inset:0;
-    background:rgba(38,36,32,0.45);
-    display:none;
-    align-items:flex-start;
-    justify-content:center;
-    padding:40px 16px;
-    overflow-y:auto;
-    z-index:10;
-  }
-  .overlay.open{display:flex;}
-  .modal{
-    background:var(--paper-card);
-    border-radius:5px;
-    max-width:460px;
-    width:100%;
-    padding:26px 26px 24px;
-    border:1px solid var(--line);
-  }
-  .modal h2{
-    font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:1.4rem;
-    margin:0 0 18px;
-  }
-  .field{margin-bottom:16px;}
-  .field label{
-    display:block;font-size:0.78rem;font-weight:600;color:var(--ink-soft);
-    margin-bottom:6px;
-  }
-  .field input[type=text], .field textarea, .field select{
-    width:100%;
-    font-family:'Inter';
-    font-size:0.9rem;
-    padding:9px 10px;
-    border:1px solid var(--line);
-    border-radius:3px;
-    background:#fff;
-    color:var(--ink);
-    resize:vertical;
-  }
-  .field textarea{min-height:80px;}
-  .rate-picker{display:flex;gap:8px;}
-  .rate-picker .dot{
-    width:22px;height:22px;border-radius:50%;
-    border:1.6px solid var(--accent-rust);
-    cursor:pointer;
-  }
-  .rate-picker .dot.filled{background:var(--accent-rust);}
-  .imgpick{
-    border:1px dashed var(--line);
-    border-radius:4px;
-    padding:14px;
-    text-align:center;
-    font-size:0.82rem;
-    color:var(--ink-soft);
-    cursor:pointer;
-    background:#fff;
-  }
-  .imgpick img{max-width:100%;max-height:140px;display:block;margin:8px auto 0;border-radius:3px;}
-  .modal-actions{
-    display:flex;justify-content:flex-end;gap:10px;margin-top:20px;
-  }
-  .btn-secondary{
-    background:none;border:1px solid var(--line);color:var(--ink);
-    padding:10px 16px;border-radius:3px;cursor:pointer;font-family:'Inter';font-size:0.85rem;
-  }
-  .btn-primary{
-    background:var(--accent-teal);border:none;color:#fff;
-    padding:10px 18px;border-radius:3px;cursor:pointer;font-family:'Inter';font-weight:600;font-size:0.85rem;
-  }
-  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
-  .err{color:var(--accent-rust);font-size:0.8rem;margin-top:-8px;margin-bottom:12px;display:none;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDLYMPICS 2026 | International Board Games Committee</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <h1>Curio</h1>
-      <p>A shared catalog for anything worth photographing, rating, and writing down.</p>
-    </div>
-    <button class="newbtn" id="openNew">+ New entry</button>
-  </header>
 
-  <div class="shared-note">Entries here are shared — anyone who opens this catalog can see and add to it.</div>
+    <!-- Background Particle & Board Grid Elements -->
+    <div class="bg-grid"></div>
+    <div class="ambient-glow"></div>
 
-  <div class="toolbar">
-    <input type="text" id="search" placeholder="Search entries…">
-    <select id="filterCat"><option value="">All categories</option></select>
-    <select id="sortBy">
-      <option value="new">Newest first</option>
-      <option value="old">Oldest first</option>
-      <option value="rating">Highest rated</option>
-    </select>
-    <span class="count" id="count"></span>
-  </div>
+    <!-- HEADER / NAVIGATION -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="brand-identity">
+                <img src="ibgc-logo.jpg" alt="IBGC Logo" class="logo-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\'><circle cx=\'25\' cy=\'25\' r=\'23\' fill=\'%23111\' stroke=\'%23c5a059\' stroke-width=\'2\'/><text x=\'25\' y=\'30\' fill=\'%23c5a059\' font-size=\'12\' text-anchor=\'middle\' font-family=\'Cinzel\'>IBGC</text></svg>'">
+                <div class="brand-text">
+                    <span class="brand-title">International Board Games Committee</span>
+                    <span class="brand-subtitle">Est. 2026</span>
+                </div>
+            </div>
 
-  <div class="grid" id="grid"></div>
-</div>
+            <nav class="site-nav" id="siteNav">
+                <a href="#home" class="nav-link active">HOME</a>
+                <a href="#midlympics" class="nav-link">MIDLYMPICS</a>
+                <a href="#games" class="nav-link">GAMES</a>
+                <a href="#history" class="nav-link">HISTORY</a>
+                <a href="#events" class="nav-link">EVENTS</a>
+                <a href="#documents" class="nav-link">DOCUMENTS</a>
+                <a href="#apply" class="nav-link nav-cta-btn">APPLY</a>
+            </nav>
 
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2>Catalog a new entry</h2>
-    <div class="field">
-      <label>Photo</label>
-      <div class="imgpick" id="imgPick">Click to choose an image<div id="imgPreviewWrap"></div></div>
-      <input type="file" id="imgInput" accept="image/*" style="display:none">
-    </div>
-    <div class="field">
-      <label>Title</label>
-      <input type="text" id="title" placeholder="What is it?">
-    </div>
-    <div class="field">
-      <label>Category</label>
-      <input type="text" id="category" placeholder="e.g. Books, Gear, Coffee, Places">
-    </div>
-    <div class="field">
-      <label>Rating</label>
-      <div class="rate-picker" id="ratePicker"></div>
-    </div>
-    <div class="field">
-      <label>Notes</label>
-      <textarea id="notes" placeholder="What stands out about it?"></textarea>
-    </div>
-    <div class="err" id="formErr">Give it a title and a rating before saving.</div>
-    <div class="modal-actions">
-      <button class="btn-secondary" id="cancelNew">Cancel</button>
-      <button class="btn-primary" id="saveNew">Save entry</button>
-    </div>
-  </div>
-</div>
-
-<script type="module">
-// ============================================================
-// FIREBASE SETUP — replace the values below with your own
-// project's config from the Firebase console (see instructions
-// you were given). Nothing will save/load until you do this.
-// ============================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const entriesCol = collection(db, "curio-entries");
-// ============================================================
-
-let entries = [];
-let pendingImage = null;
-let pendingRating = 0;
-
-const grid = document.getElementById('grid');
-const overlay = document.getElementById('overlay');
-const countEl = document.getElementById('count');
-const filterCat = document.getElementById('filterCat');
-const searchInput = document.getElementById('search');
-const sortBy = document.getElementById('sortBy');
-
-function starsHTML(rating, size){
-  let h = '<div class="stars">';
-  for(let i=1;i<=5;i++){
-    h += `<div class="dot ${i<=rating?'filled':''}"></div>`;
-  }
-  return h + '</div>';
-}
-
-function fmtDate(ts){
-  const d = new Date(ts);
-  return d.toLocaleDateString(undefined,{month:'short', day:'numeric', year:'numeric'});
-}
-
-function renderCategoryOptions(){
-  const cats = [...new Set(entries.map(e=>e.category).filter(Boolean))].sort();
-  const current = filterCat.value;
-  filterCat.innerHTML = '<option value="">All categories</option>' +
-    cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  filterCat.value = current;
-}
-
-function escapeHtml(s){
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-function render(){
-  renderCategoryOptions();
-  let list = [...entries];
-
-  const q = searchInput.value.trim().toLowerCase();
-  if(q){
-    list = list.filter(e =>
-      (e.title||'').toLowerCase().includes(q) ||
-      (e.notes||'').toLowerCase().includes(q) ||
-      (e.category||'').toLowerCase().includes(q)
-    );
-  }
-  const cat = filterCat.value;
-  if(cat) list = list.filter(e => e.category === cat);
-
-  if(sortBy.value === 'new') list.sort((a,b)=>b.createdAt-a.createdAt);
-  else if(sortBy.value === 'old') list.sort((a,b)=>a.createdAt-b.createdAt);
-  else if(sortBy.value === 'rating') list.sort((a,b)=>b.rating-a.rating || b.createdAt-a.createdAt);
-
-  countEl.textContent = `${list.length} ${list.length===1?'entry':'entries'}`;
-
-  if(list.length === 0){
-    grid.innerHTML = `<div class="empty"><strong>Nothing here yet.</strong>Be the first to catalog something.</div>`;
-    return;
-  }
-
-  grid.innerHTML = list.map(e => {
-    const num = String(entries.findIndex(x=>x.id===e.id)+1).padStart(3,'0');
-    const img = e.image ? `<img class="thumb" src="${e.image}" alt="">` : `<div class="thumb-empty">No image</div>`;
-    return `
-    <div class="card">
-      <div class="cardnum">No. ${num}</div>
-      ${img}
-      <div class="card-body">
-        ${e.category ? `<div class="card-cat">${escapeHtml(e.category)}</div>` : ''}
-        <h3 class="card-title">${escapeHtml(e.title)}</h3>
-        ${starsHTML(e.rating)}
-        ${e.notes ? `<p class="card-notes">${escapeHtml(e.notes)}</p>` : ''}
-        <div class="card-foot">
-          <span>${fmtDate(e.createdAt)}</span>
-          <button class="del" data-id="${e.id}">remove</button>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
-      </div>
-    </div>`;
-  }).join('');
+    </header>
 
-  grid.querySelectorAll('.del').forEach(btn=>{
-    btn.addEventListener('click', ()=> deleteEntry(btn.dataset.id));
-  });
-}
+    <main>
+        <!-- HERO SECTION -->
+        <section id="home" class="hero-section">
+            <div class="hero-3d-arena">
+                <div class="arena-ring ring-1"></div>
+                <div class="arena-ring ring-2"></div>
+                <div class="arena-ring ring-3"></div>
+            </div>
 
-function listenForEntries(){
-  onSnapshot(entriesCol, (snapshot)=>{
-    entries = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
-  }, (err)=>{
-    console.error('Firestore error', err);
-    grid.innerHTML = `<div class="empty"><strong>Couldn't connect.</strong>Check that the Firebase config at the top of the script has been filled in, and that Firestore rules allow access.</div>`;
-  });
-}
+            <div class="hero-content">
+                <div class="hero-logos-wrapper">
+                    <img src="ibgc-logo.jpg" alt="IBGC Emblem" class="hero-logo-badge" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'70\'><circle cx=\'35\' cy=\'35\' r=\'33\' fill=\'%23111\' stroke=\'%23c5a059\' stroke-width=\'2\'/><text x=\'35\' y=\'40\' fill=\'%23c5a059\' font-size=\'14\' text-anchor=\'middle\' font-family=\'Cinzel\'>IBGC</text></svg>'">
+                    <img src="midlympics-logo.jpg" alt="Midlympics 2026 Emblem" class="hero-logo-badge main-badge" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'90\' height=\'90\'><circle cx=\'45\' cy=\'45\' r=\'43\' fill=\'%23111\' stroke=\'%23c5a059\' stroke-width=\'2\'/><text x=\'45\' y=\'50\' fill=\'%23c5a059\' font-size=\'18\' text-anchor=\'middle\' font-family=\'Cinzel\'>M26</text></svg>'">
+                </div>
+                
+                <h1 class="hero-title">MIDLYMPICS 2026</h1>
+                <p class="hero-subtitle">FROM CURIOSITY TO CAREER</p>
+                <blockquote class="hero-quote">
+                    “A digital competitive arena for strategy, logic, creativity and skill.”
+                </blockquote>
 
-async function deleteEntry(id){
-  if(!confirm('Remove this entry from the catalog?')) return;
-  try{
-    await deleteDoc(doc(db, "curio-entries", id));
-  }catch(e){
-    console.error('Delete error', e);
-    alert('Could not remove this entry — check your connection and Firebase rules.');
-  }
-}
+                <div class="hero-actions">
+                    <a href="#games" class="btn btn-primary">EXPLORE GAMES</a>
+                    <a href="#apply" class="btn btn-outline">APPLY TO COMPETE</a>
+                </div>
+            </div>
 
-// --- modal / new entry form ---
-const openNewBtn = document.getElementById('openNew');
-const cancelNewBtn = document.getElementById('cancelNew');
-const saveNewBtn = document.getElementById('saveNew');
-const imgPick = document.getElementById('imgPick');
-const imgInput = document.getElementById('imgInput');
-const imgPreviewWrap = document.getElementById('imgPreviewWrap');
-const ratePicker = document.getElementById('ratePicker');
-const formErr = document.getElementById('formErr');
+            <!-- OFFICIAL INFORMATION BAR -->
+            <div class="official-info-bar">
+                <div class="info-item">
+                    <span class="info-label">Established</span>
+                    <span class="info-value">22 September 2026</span>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-item">
+                    <span class="info-label">Organizer</span>
+                    <span class="info-value">International Board Games Committee (IBGC)</span>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-item">
+                    <span class="info-label">Edition</span>
+                    <span class="info-value">Midlympics 2026</span>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-item">
+                    <span class="info-label">Official Events</span>
+                    <span class="info-value">9 Disciplines</span>
+                </div>
+            </div>
+        </section>
 
-for(let i=1;i<=5;i++){
-  const dot = document.createElement('div');
-  dot.className = 'dot';
-  dot.dataset.val = i;
-  dot.addEventListener('click', ()=>{
-    pendingRating = i;
-    renderRatePicker();
-  });
-  ratePicker.appendChild(dot);
-}
-function renderRatePicker(){
-  [...ratePicker.children].forEach((dot,i)=>{
-    dot.classList.toggle('filled', i < pendingRating);
-  });
-}
+        <!-- MIDLYMPICS OVERVIEW SECTION -->
+        <section id="midlympics" class="section midlympics-overview">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">THE INAUGURAL TOURNAMENT</span>
+                    <h2 class="section-title">The Digital Colosseum of Mind Sports</h2>
+                </div>
+                <div class="overview-grid">
+                    <div class="overview-card glass-panel">
+                        <div class="card-icon">🏛️</div>
+                        <h3>Institutional Genesis</h3>
+                        <p>Midlympics was officially declared and established on 22 September 2026 under the direct governance of the International Board Games Committee, setting a historic milestone for digital intellect sports.</p>
+                    </div>
+                    <div class="overview-card glass-panel">
+                        <div class="card-icon">⚡</div>
+                        <h3>The Digital Arena</h3>
+                        <p>Engineered explicitly as an elite global digital competitive event dedicated exclusively to board games, deep strategy, logical reasoning, and cognitive mastery.</p>
+                    </div>
+                    <div class="overview-card glass-panel">
+                        <div class="card-icon">🌐</div>
+                        <h3>9 Pillar Events</h3>
+                        <p>The inaugural edition features precisely 9 standardized official competitive disciplines, bringing together classical board traditions and modern digital problem-solving fields.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-function resetForm(){
-  document.getElementById('title').value = '';
-  document.getElementById('category').value = '';
-  document.getElementById('notes').value = '';
-  pendingImage = null;
-  pendingRating = 0;
-  imgPreviewWrap.innerHTML = '';
-  renderRatePicker();
-  formErr.style.display = 'none';
-}
+        <!-- GAMES SECTION (9 OFFICIAL EVENTS) -->
+        <section id="games" class="section games-section">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">OFFICIAL DISCIPLINES</span>
+                    <h2 class="section-title">The 9 Official Events</h2>
+                    <p class="section-desc">Explore the historical roots and rigorous competitive mechanics of the Midlympics 2026 catalog.</p>
+                </div>
 
-openNewBtn.addEventListener('click', ()=>{
-  resetForm();
-  overlay.classList.add('open');
-});
-cancelNewBtn.addEventListener('click', ()=> overlay.classList.remove('open'));
-overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.classList.remove('open'); });
+                <div class="games-grid" id="gamesGrid">
+                    <!-- Cards will be populated or managed via HTML/JS -->
+                </div>
+            </div>
+        </section>
 
-imgPick.addEventListener('click', ()=> imgInput.click());
-imgInput.addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{
-    const img = new Image();
-    img.onload = ()=>{
-      const canvas = document.createElement('canvas');
-      const maxW = 800;
-      const scale = Math.min(1, maxW / img.width);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      pendingImage = canvas.toDataURL('image/jpeg', 0.8);
-      imgPreviewWrap.innerHTML = `<img src="${pendingImage}">`;
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-});
+        <!-- HISTORY SECTION -->
+        <section id="history" class="section history-section">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">CHRONICLES & ORIGINS</span>
+                    <h2 class="section-title">Midlympics History</h2>
+                </div>
+                <div class="history-content glass-panel">
+                    <div class="history-timeline">
+                        <div class="timeline-node">
+                            <span class="node-date">22 September 2026</span>
+                            <h4>Official Declaration & Establishment</h4>
+                            <p>Midlympics was formally declared and established by institutional decree under the International Board Games Committee (IBGC), creating a unified standardized framework for elite global board game competition.</p>
+                        </div>
+                        <div class="timeline-node">
+                            <span class="node-date">Q3 2026</span>
+                            <h4>Structuring the Digital Arena</h4>
+                            <p>Designed from inception as a premier digital competitive platform, uniting traditional table-top mechanics with seamless network play to test strategy, logic, and creative calculation.</p>
+                        </div>
+                        <div class="timeline-node">
+                            <span class="node-date">Inaugural Season</span>
+                            <h4>The 9 Official Events Launch</h4>
+                            <p>The inaugural edition debuts with 9 rigorously curated official events, establishing competitive standards across classical board traditions and logical problem-solving frameworks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-saveNewBtn.addEventListener('click', async ()=>{
-  const title = document.getElementById('title').value.trim();
-  const category = document.getElementById('category').value.trim();
-  const notes = document.getElementById('notes').value.trim();
+        <!-- IBGC SECTION -->
+        <section id="ibgc" class="section ibgc-section">
+            <div class="container">
+                <div class="ibgc-wrapper glass-panel">
+                    <div class="ibgc-logo-area">
+                        <img src="ibgc-logo.jpg" alt="IBGC Official Seal" class="ibgc-seal" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'120\'><circle cx=\'60\' cy=\'60\' r=\'55\' fill=\'%23111\' stroke=\'%23c5a059\' stroke-width=\'3\'/><text x=\'60\' y=\'68\' fill=\'%23c5a059\' font-size=\'22\' text-anchor=\'middle\' font-family=\'Cinzel\'>IBGC</text></svg>'">
+                    </div>
+                    <div class="ibgc-info">
+                        <span class="section-tag">GOVERNING BODY</span>
+                        <h2>International Board Games Committee (IBGC)</h2>
+                        <p class="ibgc-est">Established in 2026.</p>
+                        <p class="ibgc-purpose">
+                            <strong>Purpose:</strong> To organize and support competitive board-game and digital-game events while promoting strategy, skill, creativity, sportsmanship, and fair play across international borders.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  if(!title || pendingRating === 0){
-    formErr.style.display = 'block';
-    return;
-  }
-  formErr.style.display = 'none';
+        <!-- MATCH / EVENT SECTION -->
+        <section id="events" class="section events-section">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">TOURNAMENT FIXTURES</span>
+                    <h2 class="section-title">Events & Schedule</h2>
+                    <p class="section-desc">MIDLYMPICS 2026 • 9 Official Events • Status: Inaugural Edition</p>
+                </div>
 
-  const entry = {
-    title, category, notes,
-    rating: pendingRating,
-    image: pendingImage,
-    createdAt: Date.now()
-  };
-  saveNewBtn.disabled = true;
-  try{
-    await addDoc(entriesCol, entry);
-    overlay.classList.remove('open');
-  }catch(e){
-    console.error('Save error', e);
-    alert('Could not save — check your connection and Firebase config/rules.');
-  }
-  saveNewBtn.disabled = false;
-});
+                <div class="featured-match-card glass-panel">
+                    <div class="match-badge-tag">FEATURED FIXTURE</div>
+                    <div class="match-details">
+                        <h3>MATCH 001</h3>
+                        <div class="match-game-title">Chess</div>
+                        <div class="match-meta">
+                            <span><strong>Status:</strong> Upcoming</span>
+                            <span><strong>Organizer:</strong> IBGC</span>
+                            <span><strong>Date:</strong> 29 September 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-searchInput.addEventListener('input', render);
-filterCat.addEventListener('change', render);
-sortBy.addEventListener('change', render);
+        <!-- DOCUMENTS SECTION -->
+        <section id="documents" class="section docs-section">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">ARCHIVAL RECORDS</span>
+                    <h2 class="section-title">Official Documents</h2>
+                </div>
+                
+                <div class="docs-grid">
+                    <div class="doc-card glass-panel">
+                        <div class="doc-icon">📜</div>
+                        <div class="doc-content">
+                            <h3>Founding Declaration</h3>
+                            <p class="doc-date">Date: 22 September 2026</p>
+                            <p>The institutional charter establishing the International Board Games Committee and outlining the foundational bylaws of the Midlympics competition ecosystem.</p>
+                            <button class="btn btn-sm btn-outline view-doc-btn" data-doc="declaration">View Document Text</button>
+                        </div>
+                    </div>
 
-listenForEntries();
-</script>
+                    <div class="doc-card glass-panel">
+                        <div class="doc-icon">📋</div>
+                        <div class="doc-content">
+                            <h3>Official Games List</h3>
+                            <p class="doc-date">Edition: Midlympics 2026</p>
+                            <p>The definitive catalog detailing the 9 sanctioned official competitive events, regulatory frameworks, and skill category definitions.</p>
+                            <button class="btn btn-sm btn-outline view-doc-btn" data-doc="gameslist">View Document Text</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- APPLICATION PORTAL SECTION -->
+        <section id="apply" class="section apply-section">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">COMPETITOR REGISTRATION</span>
+                    <h2 class="section-title">Application Portal</h2>
+                    <p class="section-desc">Secure your place in the inaugural Midlympics 2026 arena.</p>
+                </div>
+
+                <div class="apply-container glass-panel" id="applyContainer">
+                    <form id="registrationForm" class="reg-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" name="fullName" required placeholder="e.g., Alexander Vance">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Gmail / Email *</label>
+                                <input type="email" id="email" name="email" required placeholder="player@gmail.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="country">Country *</label>
+                                <input type="text" id="country" name="country" required placeholder="e.g., Switzerland">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="age">Age *</label>
+                                <input type="number" id="age" name="age" min="13" max="120" required placeholder="e.g., 24">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="preferredGame">Preferred Game *</label>
+                                <select id="preferredGame" name="preferredGame" required>
+                                    <option value="" disabled selected>Select an official event</option>
+                                    <option value="Chess">Chess</option>
+                                    <option value="Go">Go</option>
+                                    <option value="Othello (Reversi)">Othello (Reversi)</option>
+                                    <option value="Checkers">Checkers</option>
+                                    <option value="Connect Four">Connect Four</option>
+                                    <option value="Ludo">Ludo</option>
+                                    <option value="Scrabble">Scrabble</option>
+                                    <option value="Tetris">Tetris</option>
+                                    <option value="Coding">Coding</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="discordUsername">Discord Username (Optional)</label>
+                                <input type="text" id="discordUsername" name="discordUsername" placeholder="username#0000 or username">
+                            </div>
+                        </div>
+
+                        <!-- Custom Dynamic Captcha -->
+                        <div class="captcha-box">
+                            <label>Security Verification (Select the missing symbol in sequence)</label>
+                            <div class="captcha-prompt" id="captchaPrompt"></div>
+                            <div class="captcha-options" id="captchaOptions"></div>
+                            <input type="hidden" id="captchaValid" value="false">
+                            <span class="error-msg" id="captchaError" style="display:none; color:#ff6b6b; font-size:0.85rem; margin-top:5px;">Please solve the verification sequence correctly.</span>
+                        </div>
+
+                        <div class="form-submit-wrapper">
+                            <button type="submit" class="btn btn-primary btn-lg">SUBMIT APPLICATION</button>
+                        </div>
+                    </form>
+
+                    <!-- Success Screen (Hidden by default) -->
+                    <div id="successScreen" class="success-screen" style="display: none;">
+                        <div class="success-icon-anim">✓</div>
+                        <h2>APPLICATION RECEIVED</h2>
+                        <p class="success-subtext">Your application has been recorded locally. Keep your Participant ID for official communication.</p>
+                        
+                        <div class="success-card-details">
+                            <div class="detail-row">
+                                <span>Participant Name:</span>
+                                <strong id="resName">-</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Selected Event:</span>
+                                <strong id="resGame">-</strong>
+                            </div>
+                            <div class="detail-row highlight-id">
+                                <span>Unique Participant ID:</span>
+                                <strong id="resId">-</strong>
+                            </div>
+                        </div>
+
+                        <div class="success-actions">
+                            <button id="downloadCsvBtn" class="btn btn-primary">DOWNLOAD REGISTRATION CSV</button>
+                            <button id="applyAgainBtn" class="btn btn-outline">APPLY AGAIN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <img src="ibgc-logo.jpg" alt="IBGC Logo" class="footer-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><circle cx=\'20\' cy=\'20\' r=\'18\' fill=\'%23111\' stroke=\'%23c5a059\' stroke-width=\'2\'/><text x=\'20\' y=\'24\' fill=\'%23c5a059\' font-size=\'10\' text-anchor=\'middle\' font-family=\'Cinzel\'>IBGC</text></svg>'">
+                <div>
+                    <h4>MIDLYMPICS 2026</h4>
+                    <p>International Board Games Committee • Est. 2026</p>
+                </div>
+            </div>
+
+            <div class="footer-contact">
+                <p>Official email: <a href="mailto:ibgc.official@gmail.com">ibgc.official@gmail.com</a></p>
+                <p class="footer-tagline">“Think. Strategize. Compete.”</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 International Board Games Committee (IBGC). Fictional international competitive tournament organized for digital mind sports.</p>
+        </div>
+    </footer>
+
+    <!-- DOCUMENT MODAL -->
+    <div class="modal-overlay" id="docModal">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <h3 id="modalTitle">Document Title</h3>
+            <div class="modal-body" id="modalBody">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
